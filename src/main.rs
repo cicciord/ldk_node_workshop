@@ -4,9 +4,22 @@ use ldk_node::lightning_invoice::Invoice;
 use ldk_node::{Builder, Config, NetAddress};
 use std::str::FromStr;
 
-const ESPLORA_SERVER_URL: &str = "http://ldk-node.tnull.de:3002";
-const FAUCET_NODE_ID: &str = "031ee65dc5aca3f6f4c23408014f3554e52ac5c49080b42c1b1d0535ecb636b308";
-const FAUCET_ADDR: &str = "ldk-node.tnull.de:9736";
+// sample constants
+const ESPLORA_SERVER_URL: &str = "https://mempool.space/testnet/api";
+const NODE_ID: &str = "02eadbd9e7557375161df8b646776a547c5cbc2e95b3071ec81553f8ec2cea3b8c";
+const NODE_ADDR: &str = "18.191.253.246:9735";
+const CHANNEL_AMOUNT_SATS: u64 = 10000; 
+const INVOICE_STR: &str = "lnbc100p1psj9jhxdqud3jxktt5w46x7unfv9kz6mn0v3jsnp4q0d3p2sfluzdx45tqcs\
+h2pu5qc7lgq0xs578ngs6s0s68ua4h7cvspp5q6rmq35js88zp5dvwrv9m459tnk2zunwj5jalqtyxqulh0l\
+5gflssp5nf55ny5gcrfl30xuhzj3nphgj27rstekmr9fw3ny5989s300gyus9qyysgqcqpcrzjqw2sxwe993\
+h5pcm4dxzpvttgza8zhkqxpgffcrf5v25nwpr3cmfg7z54kuqq8rgqqqqqqqq2qqqqq9qq9qrzjqd0ylaqcl\
+j9424x9m8h2vcukcgnm6s56xfgu3j78zyqzhgs4hlpzvznlugqq9vsqqqqqqqlgqqqqqeqq9qrzjqwldmj9d\
+ha74df76zhx6l9we0vjdquygcdt3kssupehe64g6yyp5yz5rhuqqwccqqyqqqqlgqqqqjcqq9qrzjqf9e58a\
+guqr0rcun0ajlvmzq3ek63cw2w282gv3z5uupmuwvgjtq2z55qsqqg6qqqyqqqrtnqqqzq3cqygrzjqvphms\
+ywntrrhqjcraumvc4y6r8v4z5v593trte429v4hredj7ms5z52usqq9ngqqqqqqqlgqqqqqqgq9qrzjq2v0v\
+p62g49p7569ev48cmulecsxe59lvaw3wlxm7r982zxa9zzj7z5l0cqqxusqqyqqqqlgqqqqqzsqygarl9fh3\
+8s0gyuxjjgux34w75dnc6xp2l35j7es3jd4ugt3lu0xzre26yg5m7ke54n2d5sym4xcmxtl8238xxvw5h5h5\
+j5r6drg6k6zcqj0fcwg";
 
 fn main() {
 	// Welcome! Please run through the the following steps.
@@ -14,28 +27,27 @@ fn main() {
 
 	// Setup Config
 	let mut config = Config::default();
-	config.network = Network::Regtest;
+	config.network = Network::Testnet;
 
-	// Configure Esplora URL)
-	//
-	// ...
-
-	// Setup Builder from config and build() node
-	//
-	// ...
+	// Configure Esplora URL) - Setup Builder from config and build() node
+	let mut builder = Builder::from_config(config);
+	builder.set_esplora_server(ESPLORA_SERVER_URL.to_string());
+	let node = builder.build().unwrap();
 
 	// Start LDK Node
-	//
-	// ...
+	node.start().unwrap();
 
 	// Get a new funding address and have it funded via the faucet
-	//
-	// ...
-	//
+	let funding_address = node.new_onchain_address().unwrap();
+	println!("New address created: {}", funding_address);
+	println!("Send funds to this address before trying to open a channel. ({}sat needed)", CHANNEL_AMOUNT_SATS);
+	pause();
 
 	// Open channel to our node (see details above)
-	//
-	// ...
+	let node_id = PublicKey::from_str(NODE_ID).unwrap();
+	let node_addr = NetAddress::from_str(NODE_ADDR).unwrap();
+	
+	let _ = node.connect_open_channel(node_id, node_addr, CHANNEL_AMOUNT_SATS, None, None, false);
 
 	//==============================================
 	// We're now waiting for the channel to be confirmed:
@@ -62,13 +74,10 @@ fn main() {
 	//==============================================
 
 	// Parse invoice (Invoice::from_str)
-	//
-	// ...
-	//
-
+	let invoice = Invoice::from_str(INVOICE_STR).unwrap();
+	
 	// Pay invoice
-	//
-	// ...
+	node.send_payment(&invoice).unwrap();
 
 	//==============================================
 	// Wait for the payment to be successful.
