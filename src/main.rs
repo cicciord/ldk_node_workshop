@@ -6,8 +6,8 @@ use std::str::FromStr;
 
 // sample constants
 const ESPLORA_SERVER_URL: &str = "https://mempool.space/testnet/api";
-const NODE_ID: &str = "02eadbd9e7557375161df8b646776a547c5cbc2e95b3071ec81553f8ec2cea3b8c";
-const NODE_ADDR: &str = "18.191.253.246:9735";
+const NODE_ID: &str = "0296e20fa99d2940b8b00117e65d27003f0d8f81a0c960f71a5466d1aadf5ea5ea";
+const NODE_ADDR: &str = "69.59.18.82:9735";
 const CHANNEL_AMOUNT_SATS: u64 = 10000; 
 const INVOICE_STR: &str = "lnbc100p1psj9jhxdqud3jxktt5w46x7unfv9kz6mn0v3jsnp4q0d3p2sfluzdx45tqcs\
 h2pu5qc7lgq0xs578ngs6s0s68ua4h7cvspp5q6rmq35js88zp5dvwrv9m459tnk2zunwj5jalqtyxqulh0l\
@@ -73,11 +73,12 @@ fn main() {
 	node.event_handled();
 	//==============================================
 
-	// Parse invoice (Invoice::from_str)
-	let invoice = Invoice::from_str(INVOICE_STR).unwrap();
+	// // Parse invoice (Invoice::from_str)
+	// let invoice = Invoice::from_str(INVOICE_STR).unwrap();
 	
-	// Pay invoice
-	node.send_payment(&invoice).unwrap();
+	// // Pay invoice
+	// node.send_payment(&invoice).unwrap();
+	let _ = node.send_spontaneous_payment(50, PublicKey::from_str(NODE_ID).unwrap());
 
 	//==============================================
 	// Wait for the payment to be successful.
